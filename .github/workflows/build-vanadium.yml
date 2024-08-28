@@ -1,0 +1,86 @@
+name: build-vanadium
+
+on:
+  workflow_dispatch:
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  build:
+    runs-on: self-hosted
+    container: 
+      image: ubuntu:22.04
+      
+    timeout-minutes: 600
+    
+    env:
+      # must correspond to existing tag in https://chromium.googlesource.com/chromium/src/+refs and https://github.com/GrapheneOS/Vanadium/tags respectively
+      CHROMIUM_VERSION: 128.0.6613.88
+      VANADIUM_VERSION: 128.0.6613.88.1
+
+    steps:
+      - name: Install dependencies
+        run: |
+          export DEBIAN_FRONTEND=noninteractive
+          apt update
+          apt install -y python3 git openjdk-8-jre-headless curl wget bzip2
+          
+      - name: Install depot_tools
+        run: |
+          cd /opt
+          git clone https://chromium.googlesource.com/chromium/tools/depot_tools.git
+
+      - name: Download Vanadium source code
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ env.VANADIUM_VERSION }}
+          path: Vanadium
+          
+      - name: Generate a signing key for Vanadium
+        run: |
+          cd Vanadium
+          export PATH="$PATH:/opt/depot_tools"
+          # TODO: use Github actions secret
+          export KEY_PASSWORD=password
+          keytool -genkey -v -keystore vanadium.keystore -keypass $KEY_PASSWORD -storepass $KEY_PASSWORD -storetype pkcs12 -alias vanadium -keyalg RSA -keysize 4096 -sigalg SHA512withRSA -validity 10000 -dname "cn=GrapheneOS"
+        
+      - name: Fetch the Chromium sources
+        run: |
+          cd Vanadium
+          export PATH="$PATH:/opt/depot_tools"
+          fetch --nohooks android
+        
+      - name: Build Vanadium
+        run: |
+          # Sync to the latest stable release for Android
+          cd Vanadium/src
+          export PATH="$PATH:/opt/depot_tools"
+          git fetch --tags
+          git checkout $CHROMIUM_VERSION
+          # set git credentials so that git doesn't complain
+          git config --global user.email "you@example.com"
+          git config --global user.name "GrapheneOS-builder"
+          # Apply the GrapheneOS patches on top of the tagged release
+          git am --whitespace=nowarn --keep-non-patch ../patches/*.patch
+          # Sync submodules and obtain build dependencies
+          gclient sync -D --with_branch_heads --with_tags --jobs 32
+          # copy build config to the build directory
+          cp ../args.gn out/Default/args.gn
+          # set trichrome_certdigest to the correct value for your generated signing key.
+          TRICHROME_CERTDIGEST=$(keytool -export-cert -alias vanadium -keystore vanadium.keystore | sha256sum)
+          echo "\ntrichrome_certdigest = $TRICHROME_CERTDIGEST" >> out/Default/args.gn
+          # show config
+          cat out/Default/args.gn
+          # Build the components
+          # do we need to build trichrome_webview_64_32_apk?
+          chrt -b 0 autoninja -C out/Default/ trichrome_webview_64_32_apk trichrome_chrome_64_32_apk trichrome_library_64_32_apk vanadium_config_apk
+          # Sign the apks
+          ../generate-release.sh out
+          
+      - name: Upload APKs as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Vanadium
+          path: out/Default/apks/release/*.apk
