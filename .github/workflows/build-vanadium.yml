@@ -71,6 +71,7 @@ jobs:
           # Sync submodules and obtain build dependencies
           gclient sync -D --with_branch_heads --with_tags --jobs 32
           # copy build config to the build directory
+          mkdir out/Default
           cp ../args.gn out/Default/args.gn
           # set trichrome_certdigest to the correct value for your generated signing key.
           TRICHROME_CERTDIGEST=$(keytool -export-cert -alias vanadium -keystore vanadium.keystore | sha256sum)
