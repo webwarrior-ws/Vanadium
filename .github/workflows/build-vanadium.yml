@@ -18,6 +18,8 @@ jobs:
     env:
       # must correspond to existing tag in https://chromium.googlesource.com/chromium/src/+refs
       DEFAULT_VERSION: 128.0.6613.88
+      # TODO: use Github actions secret
+      KEY_PASSWORD: password
 
     steps:
       - name: Install dependencies
@@ -36,8 +38,6 @@ jobs:
       - name: Generate a signing key for Vanadium
         run: |
           export PATH="$PATH:/opt/depot_tools"
-          # TODO: use Github actions secret
-          export KEY_PASSWORD=password
           keytool -genkey -v -keystore vanadium.keystore -keypass $KEY_PASSWORD -storepass $KEY_PASSWORD -storetype pkcs12 -alias vanadium -keyalg RSA -keysize 4096 -sigalg SHA512withRSA -validity 10000 -dname "cn=GrapheneOS"
         
       - name: Fetch the Chromium sources
@@ -76,7 +76,7 @@ jobs:
           cp ../args.gn out/Default/args.gn
           echo "args.gn copied"
           # set trichrome_certdigest to the correct value for your generated signing key.
-          TRICHROME_CERTDIGEST=$(keytool -export-cert -alias vanadium -keystore vanadium.keystore | sha256sum)
+          TRICHROME_CERTDIGEST=$(keytool -export-cert -alias vanadium -keystore vanadium.keystore  -keypass $KEY_PASSWORD -storepass $KEY_PASSWORD | sha256sum)
           echo "\ntrichrome_certdigest = $TRICHROME_CERTDIGEST" >> out/Default/args.gn
           # show config
           cat out/Default/args.gn
