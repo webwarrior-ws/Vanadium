@@ -45,11 +45,11 @@ jobs:
           export PATH="$PATH:/opt/depot_tools"
           fetch --nohooks android
         
-      - name: Build Vanadium
+      - name: Apply Vanadium patches
         run: |
-          # Sync to the latest stable release for Android
           cd src
           export PATH="$PATH:/opt/depot_tools"
+          # Sync to the latest stable release for Android
           git fetch --tags
           if [ "$GITHUB_REF_TYPE" = "tag" ]; then
             # Discard last number to get Chromium version that this vesion is based on
@@ -66,9 +66,15 @@ jobs:
           git am --whitespace=nowarn --keep-non-patch ../patches/*.patch
           # Sync submodules and obtain build dependencies
           gclient sync -D --with_branch_heads --with_tags --jobs 32
+        
+      - name: Build Vanadium
+        run: |
+          cd src
+          export PATH="$PATH:/opt/depot_tools"
           # copy build config to the build directory
           mkdir out/Default
           cp ../args.gn out/Default/args.gn
+          echo "args.gn copied"
           # set trichrome_certdigest to the correct value for your generated signing key.
           TRICHROME_CERTDIGEST=$(keytool -export-cert -alias vanadium -keystore vanadium.keystore | sha256sum)
           echo "\ntrichrome_certdigest = $TRICHROME_CERTDIGEST" >> out/Default/args.gn
