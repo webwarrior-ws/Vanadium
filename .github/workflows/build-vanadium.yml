@@ -56,7 +56,8 @@ jobs:
           export PATH="$PATH:/opt/depot_tools"
           git fetch --tags
           if [ "$GITHUB_REF_TYPE" = "tag" ]; then
-            # discard last element
+            # Discard last number to get Chromium version that this vesion is based on
+            # e.g. 128.0.6613.88.1 -> 128.0.6613.88 
             CHROMIUM_VERSION=${basename $GITHUB_REF_TYPE}
           else
             CHROMIUM_VERSION=$DEFAULT_VERSION
