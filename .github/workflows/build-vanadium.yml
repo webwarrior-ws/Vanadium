@@ -76,8 +76,8 @@ jobs:
           cp ../args.gn out/Default/args.gn
           echo "args.gn copied"
           # set trichrome_certdigest to the correct value for your generated signing key.
-          keytool -export-cert -alias vanadium -keystore vanadium.keystore -keypass $KEY_PASSWORD -storepass $KEY_PASSWORD -v
-          TRICHROME_CERTDIGEST=$(keytool -export-cert -alias vanadium -keystore vanadium.keystore -keypass $KEY_PASSWORD -storepass $KEY_PASSWORD | sha256sum)
+          keytool -export-cert -alias vanadium -keystore ../vanadium.keystore -keypass $KEY_PASSWORD -storepass $KEY_PASSWORD -v
+          TRICHROME_CERTDIGEST=$(keytool -export-cert -alias vanadium -keystore ../vanadium.keystore -keypass $KEY_PASSWORD -storepass $KEY_PASSWORD | sha256sum)
           echo "\ntrichrome_certdigest = $TRICHROME_CERTDIGEST" >> out/Default/args.gn
           # show config
           cat out/Default/args.gn
