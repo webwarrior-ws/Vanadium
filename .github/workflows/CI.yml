@@ -80,6 +80,8 @@ jobs:
           sed -i 's/trichrome_certdigest = ".*"/trichrome_certdigest = '\""$TRICHROME_CERTDIGEST\""'/' out/Default/args.gn
           # show config
           cat out/Default/args.gn
+          # install dependencies
+          ./build/install-build-deps.sh          
           # generate ninja.build file
           gn gen out/Default/
           # Build the components
