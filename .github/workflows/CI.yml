@@ -26,7 +26,7 @@ jobs:
         run: |
           export DEBIAN_FRONTEND=noninteractive
           apt update
-          apt install --yes python3 git openjdk-8-jre-headless curl wget bzip2 lsb-release
+          apt install --yes python3 git openjdk-8-jre-headless curl wget bzip2 lsb-release sudo
           
       - name: Install depot_tools
         run: |
