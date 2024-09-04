@@ -26,7 +26,7 @@ jobs:
         run: |
           export DEBIAN_FRONTEND=noninteractive
           apt update
-          apt install --yes python3 git openjdk-8-jre-headless curl wget bzip2 lsb-release sudo
+          apt install --yes python3 git openjdk-8-jre-headless curl wget bzip2
           
       - name: Install depot_tools
         run: |
@@ -79,9 +79,7 @@ jobs:
           TRICHROME_CERTDIGEST=$(keytool -export-cert -alias vanadium -keystore ../vanadium.keystore -keypass $KEY_PASSWORD -storepass $KEY_PASSWORD | sha256sum | head -c 64)
           sed -i 's/trichrome_certdigest = ".*"/trichrome_certdigest = '\""$TRICHROME_CERTDIGEST\""'/' out/Default/args.gn
           # show config
-          cat out/Default/args.gn
-          # install dependencies
-          ./build/install-build-deps.sh          
+          cat out/Default/args.gn      
           # generate ninja.build file
           gn gen out/Default/
           # Build the components
