@@ -13,7 +13,7 @@ jobs:
     container: 
       image: ubuntu:24.04
       
-    timeout-minutes: 900
+    timeout-minutes: 1200
     
     env:
       # must correspond to existing tag in https://chromium.googlesource.com/chromium/src/+refs
