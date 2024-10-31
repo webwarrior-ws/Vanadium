@@ -85,6 +85,10 @@ jobs:
           # Build the components
           # do we need to build trichrome_webview_64_32_apk?
           chrt -b 0 autoninja -C out/Default/ trichrome_webview_64_32_apk trichrome_chrome_64_32_apk trichrome_library_64_32_apk vanadium_config_apk
+          #
+          echo "Build complete"
+          ls -l out/Default
+          ls -l out/Default/apks
           # Sign the apks
           ../generate-release.sh out
           
