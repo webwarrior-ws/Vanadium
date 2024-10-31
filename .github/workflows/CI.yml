@@ -90,7 +90,7 @@ jobs:
           ls -l out/Default
           ls -l out/Default/apks
           # Sign the apks
-          ../generate-release.sh out
+          echo $KEY_PASSWORD | ../generate-release.sh out
           
       - name: Upload APKs as artifact
         uses: actions/upload-artifact@v4
