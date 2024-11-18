@@ -91,9 +91,10 @@ jobs:
           ls -l out/Default/apks
           # Sign the apks
           echo $KEY_PASSWORD | ../generate-release.sh out
+          ls -l out/Default/apks/release
           
       - name: Upload APKs as artifact
         uses: actions/upload-artifact@v4
         with:
           name: Vanadium
-          path: src/out/Default/apks/*.apk
+          path: src/out/Default/apks/release/*.apk
